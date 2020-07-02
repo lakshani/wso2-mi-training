@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/healthcare" name="HealthcareAPI" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/querydoctor/{category}">
+        <inSequence>
+            <log description="Request Log" level="custom">
+                <property name="Log Property message" value="Welcome to HealthcareService"/>
+            </log>
+            <send>
+                <endpoint key="QueryDoctorEP"/>
+            </send>
+        </inSequence>
+        <outSequence>
+            <send/>
+        </outSequence>
+        <faultSequence/>
+    </resource>
+    <resource methods="POST" uri-template="/categories/{category}/reserve">
+        <inSequence>
+            <property expression="json-eval($.hospital)" name="Hospital" scope="default" type="STRING"/>
+            <switch source="$ctx:Hospital">
+                <case regex="grand oak community hospital">
+                    <property name="uri.var.hospital" scope="default" type="STRING" value="grandoaks"/>
+                    <log level="custom">
+                        <property expression="fn:concat('Routing to ', $ctx:Hospital)" name="message"/>
+                    </log>
+                    <send>
+                        <endpoint key="GrandOakEP"/>
+                    </send>
+                </case>
+                <case regex="clemency medical center">
+                    <property name="uri.var.hospital" scope="default" type="STRING" value="clemency"/>
+                    <log level="custom">
+                        <property expression="fn:concat('Routing to ', $ctx:Hospital)" name="message"/>
+                    </log>
+                    <send>
+                        <endpoint key="ClemencyEP"/>
+                    </send>
+                </case>
+                <case regex="pine valley community hospital">
+                    <property name="uri.var.hospital" scope="default" type="STRING" value="pinevalley"/>
+                    <log level="custom">
+                        <property expression="fn:concat('Routing to ', $ctx:Hospital)" name="message"/>
+                    </log>
+                    <send>
+                        <endpoint key="PineValleyEP"/>
+                    </send>
+                </case>
+                <default>
+                    <log level="custom">
+                        <property expression="fn:concat('Invalid hospital - ', $ctx:Hospital)" name="Fault Log"/>
+                    </log>
+                    <respond/>
+                </default>
+            </switch>
+            <respond/>
+        </inSequence>
+        <outSequence>
+            <send/>
+        </outSequence>
+        <faultSequence/>
+    </resource>
+</api>
